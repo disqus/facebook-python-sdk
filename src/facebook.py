@@ -168,12 +168,15 @@ class GraphAPI(object):
             else:
                 args["access_token"] = self.access_token
         post_data = None if post_args is None else urllib.urlencode(post_args)
-        file = urllib2.urlopen("https://graph.facebook.com/" + path + "?" +
-                              urllib.urlencode(args), post_data)
+
         try:
+            file = urllib2.urlopen("https://graph.facebook.com/" + path + "?" +
+                                  urllib.urlencode(args), post_data)
             response = _parse_json(file.read())
-        finally:
             file.close()
+        except urllib2.HTTPError, e:
+            response = _parse_json(e.read())
+
         if response.get("error"):
             raise GraphAPIError(response["error"]["type"],
                                 response["error"]["message"])
